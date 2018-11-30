@@ -20,16 +20,12 @@ struct dentry *tfs_lookup(struct inode *parent_inode,
 	int                 i         = 0; 
 	struct inode       *inode     = 0;
 
-	printk(KERN_ERR TFS "tfs_lookup: entry\n");
-	
 	sb        = parent_inode->i_sb;
 	directory = (struct xfs_entry *)kmalloc(PAGE_SIZE, GFP_KERNEL);
 	if (!directory) {
 		printk(KERN_ERR TFS "tfs_lookup: cannot alloc page for directory\n");
 		return ERR_PTR(-ENOMEM);
 	}
-
-	printk(KERN_ERR TFS "tfs_lookup: page for directory allocated\n");
 
 	ret = tfs_dev_read(sb, parent_inode->i_ino, (void*)directory, PAGE_SIZE);
 	if(ret) {
@@ -38,25 +34,21 @@ struct dentry *tfs_lookup(struct inode *parent_inode,
 		return ERR_PTR(ret);
 	}
 
-	printk(KERN_ERR TFS "tfs_lookup: read a page from device inode number[%ld]\n", parent_inode->i_ino);
 	
 	iter = directory;
 	while(iter->used) {
 		iter++;
 		nentries++;
 	}
-
 	printk(KERN_ERR TFS "tfs_lookup: directory nentries [%d]\n", nentries);
 
 	printk(KERN_ERR TFS "tfs_lookup: searching for [%s]\n", child_dentry->d_name.name);
 
 	iter = directory;
 	for (i = 0; i < nentries; ++i, ++iter) {
-		size_t length = min(strlen(child_dentry->d_name.name), strlen(iter->name));
+		size_t length = min(strlen(child_dentry->d_name.name), (size_t)iter->name.size);
 
-		printk(KERN_ERR TFS "tfs_lookup: entry [%s] length selected [%ld]\n", iter->name, length);
-
-		if (strncmp(child_dentry->d_name.name, iter->name, length) != 0)
+		if (strncmp(child_dentry->d_name.name, iter->name.text, length) != 0)
 			continue;
 
 		printk(KERN_ERR TFS "tfs_lookup: match\n");
@@ -71,9 +63,9 @@ struct dentry *tfs_lookup(struct inode *parent_inode,
 		if (inode->i_state & I_NEW) {
 			inode_init_owner(inode, parent_inode, 0);
 
-			inode->i_ino  = iter->lba;
+			inode->i_ino  = iter->lba/XFS_SECTOR_SIZE;
 			inode->i_mode = iter->is_directory ? TFS_MODE_DIRECTORY : TFS_MODE_FILE;
-			inode->i_size = iter->is_directory ? iter->items : iter->size;
+			inode->i_size = iter->size;//iter->is_directory ? iter->items : iter->size;
 			//set_nlink(inode, ?);
 			//i_uid_write(inode, ?);
 			//i_gid_write(inode, ?);
@@ -96,7 +88,6 @@ struct dentry *tfs_lookup(struct inode *parent_inode,
 	kfree(directory);
 	d_add(child_dentry, inode);
 
-	printk(KERN_ERR TFS "tfs_lookup: exiting\n");
 	return NULL;
 }
 

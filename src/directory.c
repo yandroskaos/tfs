@@ -18,8 +18,6 @@ int tfs_iterate(struct file *filp, struct dir_context *ctx)
 	int                 ret       = 0;
 	int                 i         = 0;
 	
-	printk(KERN_ERR TFS "tfs_iterate: entry\n");
-
 	printk(KERN_ERR TFS "tfs_iterate: ctx->pos = %lld\n", ctx->pos);
 
 	sb        = filp->f_inode->i_sb;
@@ -28,7 +26,6 @@ int tfs_iterate(struct file *filp, struct dir_context *ctx)
 		printk(KERN_ERR TFS "tfs_iterate: error allocating memory for directory\n");
 		return -ENOMEM;
 	}
-	printk(KERN_ERR TFS "tfs_iterate: memory for directory allocated\n");
 
 	ret = tfs_dev_read(sb, filp->f_inode->i_ino, (void*)directory, PAGE_SIZE);
 	if(ret) {
@@ -36,8 +33,6 @@ int tfs_iterate(struct file *filp, struct dir_context *ctx)
 		kfree(directory);
 		return ret;
 	}
-
-	printk(KERN_ERR TFS "tfs_iterate: directory read from device\n");
 
 	iter = directory;
 	while(iter->used) {
@@ -55,17 +50,16 @@ int tfs_iterate(struct file *filp, struct dir_context *ctx)
 
 	iter = directory + ctx->pos;
 	for (i = ctx->pos; i < nentries; ++i) {
-		dir_emit(ctx, iter->name, strlen(iter->name), iter->lba, 
+		dir_emit(ctx, iter->name.text, iter->name.size, iter->lba, 
 			iter->is_directory ? DT_DIR : DT_REG);
 
-		printk(KERN_ERR TFS "tfs_iterate: emmiting [%s]\n", iter->name);
+		printk(KERN_ERR TFS "tfs_iterate: emmiting [%s]\n", iter->name.text);
 		
 		ctx->pos++;
 		iter++;
 	}
 	kfree(directory);
 
-	printk(KERN_ERR TFS "tfs_iterate: exit success\n");
 	return 0;
 }
 

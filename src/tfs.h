@@ -10,14 +10,20 @@
 #define XFS_DIRECTORY_SIZE	(XFS_SECTOR_SIZE * XFS_DIRECTORY_SECTORS)
 #define XFS_ENTRY_NAME_SIZE	52
 
+struct xfs_string
+{
+	u8 size;
+	u8 text[XFS_ENTRY_NAME_SIZE];
+};
+
 struct xfs_entry
 {
-	u8	used;
-	u8	is_directory;
-	u8	items;
-	u8	name[XFS_ENTRY_NAME_SIZE];
-	__le32	lba;
-	__le32	size;
+	u8                used;
+	u8                is_directory;
+	u8                items;
+	struct xfs_string name;
+	__le32            lba;
+	__le32            size;
 };
 
 #define TFS "[tfs]"

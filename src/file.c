@@ -19,16 +19,12 @@ int tfs_readpage(struct file *file, struct page *page)
 	unsigned long sector;
 	int           ret;
 
-	printk(KERN_ERR TFS "tfs_readpage: entry\n");
-
 	inode = page->mapping->host;
 	buffer = kmap(page);
 	if (!buffer) {
 		printk(KERN_ERR TFS "tfs_readpage: unable to map page\n");
 		return -ENOMEM;
 	}
-
-	printk(KERN_ERR TFS "tfs_readpage: page mapped\n");
 
 	offset    = page_offset(page);
 	size      = i_size_read(inode);
@@ -53,8 +49,6 @@ int tfs_readpage(struct file *file, struct page *page)
 			fill_size = 0;
 			ret = -EIO;
 		}
-
-		printk(KERN_ERR TFS "tfs_readpage: success reading from device\n");
 	}
 
 	if (fill_size < PAGE_SIZE) {
@@ -71,7 +65,6 @@ int tfs_readpage(struct file *file, struct page *page)
 	kunmap(page);
 	unlock_page(page);
 	
-	printk(KERN_ERR TFS "tfs_readpage: exiting [%d]\n", ret);
 	return ret;
 }
 

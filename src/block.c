@@ -31,8 +31,6 @@ int tfs_dev_read(struct super_block *sb, unsigned long sector,
 			return -EIO;
 		}
 
-		printk(KERN_ERR TFS "tfs_dev_read: block[%ld] read\n", sector - 1);
-
 		memcpy(buffer, bh->b_data, XFS_SECTOR_SIZE);
 		brelse(bh);
 		buffer += XFS_SECTOR_SIZE;
@@ -45,12 +43,9 @@ int tfs_dev_read(struct super_block *sb, unsigned long sector,
 			return -EIO;
 		}
 
-		printk(KERN_ERR TFS "tfs_dev_read: last block[%ld] read\n", sector - 1);
-
 		memcpy(buffer, bh->b_data, last_read);
 		brelse(bh);
  	}
 
-	printk(KERN_ERR TFS "tfs_dev_read: exit success\n");
 	return 0;
 }
