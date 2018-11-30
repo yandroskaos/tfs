@@ -18,7 +18,7 @@ Each directory entry is 64 bytes long and has the following data:
 - **used**         : indicates if the entry is being used
 - **is_directory** : indicates if the entry points to a directory
 - **items**        : indicates the number of used entries if entry points to a directory
-- **name**         : name of the entry to a maximum of 51 usable characters
+- **name**         : name of the entry to a maximum of 51 usable characters preceded with the size (as pascal strings)
 - **lba**          : logical block address of the element
 - **size**         : size (4096 for directories, whatever for files)
 
