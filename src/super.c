@@ -18,7 +18,7 @@ int tfs_fill_super(struct super_block *sb, void *data, int silent)
 	printk(KERN_ERR TFS "tfs_fill_super: entry\n");
 
 	ret = sb_set_blocksize(sb, XFS_SECTOR_SIZE);
-	if(ret) {
+	if(!ret) {
 		printk(KERN_ERR TFS "tfs_fill_super: cannot set block size in device\n");
 		return ret;
 	}
@@ -122,10 +122,12 @@ void tfs_unmount(struct super_block *sb)
 	printk(KERN_INFO TFS "Unmount succesful.\n");
 }
 
-const struct file_system_type tfs_type = {
+struct file_system_type tfs_type = {
+	.owner   = THIS_MODULE,
 	.name    = "tfs",
 	.mount   = tfs_mount,
 	.kill_sb = tfs_unmount,
+	.fs_flags = FS_REQUIRES_DEV
 };
 
 int tfs_init(void)

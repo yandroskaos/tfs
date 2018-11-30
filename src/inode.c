@@ -100,6 +100,6 @@ struct dentry *tfs_lookup(struct inode *parent_inode,
 	return NULL;
 }
 
-const struct inode_operations tfs_inode_ops = {
+struct inode_operations tfs_inode_ops = {
 	.lookup = tfs_lookup,
 };

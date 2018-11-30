@@ -7,8 +7,8 @@
 #define XFT_SIZE	    (XFS_SECTOR_SIZE * XFT_SECTORS)
 
 #define XFS_DIRECTORY_SECTORS	8
-#define XFS_DIRECTORY_SIZE		(XFS_SECTOR_SIZE * XFS_DIRECTORY_SECTORS)
-#define XFS_ENTRY_NAME_SIZE		52
+#define XFS_DIRECTORY_SIZE	(XFS_SECTOR_SIZE * XFS_DIRECTORY_SECTORS)
+#define XFS_ENTRY_NAME_SIZE	52
 
 struct xfs_entry
 {
@@ -22,12 +22,12 @@ struct xfs_entry
 
 #define TFS "[tfs]"
 
-extern const struct file_system_type         tfs_type;
-extern const struct file_operations          tfs_file_ops;
-extern const struct file_operations          tfs_dir_ops;
-extern const struct inode_operations         tfs_inode_ops;
-extern const struct super_operations         tfs_super_ops;
-extern const struct address_space_operations tfs_as_ops;
+extern struct file_system_type         tfs_type;
+extern struct file_operations          tfs_file_ops;
+extern struct file_operations          tfs_dir_ops;
+extern struct inode_operations         tfs_inode_ops;
+extern struct super_operations         tfs_super_ops;
+extern struct address_space_operations tfs_as_ops;
 
 #define TFS_MODE_DIRECTORY	(S_IFDIR | 0644)
 #define TFS_MODE_FILE		(S_IFREG | 0644)

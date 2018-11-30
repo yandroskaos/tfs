@@ -75,13 +75,14 @@ int tfs_readpage(struct file *file, struct page *page)
 	return ret;
 }
 
-const struct file_operations tfs_file_ops = {
+struct file_operations tfs_file_ops = {
+	.owner      = THIS_MODULE,
 	.llseek     = generic_file_llseek,
 	.mmap       = generic_file_mmap,
 	.fsync      = generic_file_fsync,
 	.read_iter  = generic_file_read_iter,
 };
 
-const struct address_space_operations tfs_as_ops = {
-	.readpage    = tfs_readpage,
+struct address_space_operations tfs_as_ops = {
+	.readpage = tfs_readpage,
 };

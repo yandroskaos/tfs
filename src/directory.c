@@ -69,7 +69,8 @@ int tfs_iterate(struct file *filp, struct dir_context *ctx)
 	return 0;
 }
 
-const struct file_operations tfs_dir_ops = {
+struct file_operations tfs_dir_ops = {
+	.owner          = THIS_MODULE,
 	.read           = generic_read_dir,
 	.iterate_shared = tfs_iterate,
 	.llseek         = generic_file_llseek,
