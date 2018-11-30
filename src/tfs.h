@@ -12,12 +12,12 @@
 
 struct xfs_entry
 {
-	u8	   used;
-	u8	   is_directory;
-	u8	   items;
-	u8     name[XFS_ENTRY_NAME_SIZE];
-	__le32 lba;
-	__le32 size;
+	u8	used;
+	u8	is_directory;
+	u8	items;
+	u8	name[XFS_ENTRY_NAME_SIZE];
+	__le32	lba;
+	__le32	size;
 };
 
 #define TFS "[tfs]"
@@ -30,7 +30,7 @@ extern const struct super_operations         tfs_super_ops;
 extern const struct address_space_operations tfs_as_ops;
 
 #define TFS_MODE_DIRECTORY	(S_IFDIR | 0644)
-#define TFS_MODE_FILE	    (S_IFREG | 0644)
+#define TFS_MODE_FILE		(S_IFREG | 0644)
 
 int tfs_dev_read(struct super_block *sb, unsigned long sector,
                  void *buffer, size_t buffer_size);

@@ -15,8 +15,16 @@ int tfs_fill_super(struct super_block *sb, void *data, int silent)
 	struct xfs_entry   *xft = 0;
 	struct inode       *root_inode = 0;
 
-	sb_set_blocksize(sb, XFS_SECTOR_SIZE);
-	
+	printk(KERN_ERR TFS "tfs_fill_super: entry\n");
+
+	ret = sb_set_blocksize(sb, XFS_SECTOR_SIZE);
+	if(ret) {
+		printk(KERN_ERR TFS "tfs_fill_super: cannot set block size in device\n");
+		return ret;
+	}
+
+	printk(KERN_ERR TFS "tfs_fill_super: block size set\n");
+
 	//
 	// Read block 1 (0 is for booting)
 	//
@@ -24,10 +32,14 @@ int tfs_fill_super(struct super_block *sb, void *data, int silent)
 	if (!xft)
 		return -ENOMEM;
 
+	printk(KERN_ERR TFS "tfs_fill_super: xft allocated\n");
+
 	ret = tfs_dev_read(sb, 1, (void*)xft, XFS_SECTOR_SIZE);
 	if(ret)
 		goto release;
 
+	printk(KERN_ERR TFS "tfs_fill_super: xft read\n");
+	
 	//
 	// Fill vfs super block
 	//
@@ -37,15 +49,18 @@ int tfs_fill_super(struct super_block *sb, void *data, int silent)
 	sb->s_flags   |= SB_RDONLY | SB_NOATIME;
 	//sb->s_op       = &tfs_super_ops;
 
+	printk(KERN_ERR TFS "tfs_fill_super: vfs superblock init\n");
+
 	//
 	// Create vfs root inode
 	//
 	root_inode = new_inode(sb);
-	if (!root_inode)
-	{
+	if (!root_inode) {
 		ret = -ENOMEM;
 		goto release;
 	}
+
+	printk(KERN_ERR TFS "tfs_fill_super: root inode created\n");
 
 	inode_init_owner(root_inode, NULL, S_IFDIR |
 			 S_IRUSR | S_IXUSR |
@@ -54,31 +69,34 @@ int tfs_fill_super(struct super_block *sb, void *data, int silent)
 	root_inode->i_sb    = sb;
 	root_inode->i_ino   = 1;
 	root_inode->i_atime = root_inode->i_mtime = root_inode->i_ctime =
-	    current_time(root_inode);
-    root_inode->i_mode = TFS_MODE_DIRECTORY;
-    root_inode->i_size = 3;
+		current_time(root_inode);
+	root_inode->i_mode = TFS_MODE_DIRECTORY;
+	root_inode->i_size = 3;
 	inc_nlink(root_inode);
 	root_inode->i_op  = &tfs_inode_ops;
 	root_inode->i_fop = &tfs_dir_ops;
+
+	printk(KERN_ERR TFS "tfs_fill_super: root inode init\n");
 
 	//
 	// Make dentry
 	//
 	sb->s_root = d_make_root(root_inode);
-	if (!sb->s_root)
-	{
+	if (!sb->s_root) {
 		ret = -ENOMEM;
 		goto release;
 	}
 
+	printk(KERN_ERR TFS "tfs_fill_super: root dentry created\n");
+
+	printk(KERN_ERR TFS "tfs_fill_super: exit success\n");
 	return 0;
 
 release:
 	sb->s_fs_info = 0;
 	if(xft)
 		kfree(xft);
-	//if(root_inode)
-	//	free_inode(root_inode);
+	printk(KERN_ERR TFS "tfs_fill_super: exit failure [%d]\n", ret);
 	return ret;
 }
 
@@ -90,7 +108,7 @@ struct dentry *tfs_mount(struct file_system_type *fs_type, int flags,
 	ret = mount_bdev(fs_type, flags, dev_name, data, tfs_fill_super);
 
 	if (IS_ERR(ret))
-		printk(KERN_ERR TFS "Error mounting\n");
+		printk(KERN_ERR TFS "Error mounting on [%s]\n", dev_name);
 	else
 		printk(KERN_INFO TFS "Succesfully mounted on [%s]\n", dev_name);
 

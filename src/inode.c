@@ -10,7 +10,7 @@
 #include "tfs.h"
 
 struct dentry *tfs_lookup(struct inode *parent_inode,
-			              struct dentry *child_dentry, unsigned int flags)
+			  struct dentry *child_dentry, unsigned int flags)
 {
 	struct super_block *sb        = 0;
 	struct xfs_entry   *directory = 0;
@@ -20,42 +20,55 @@ struct dentry *tfs_lookup(struct inode *parent_inode,
 	int                 i         = 0; 
 	struct inode       *inode     = 0;
 
+	printk(KERN_ERR TFS "tfs_lookup: entry\n");
+	
 	sb        = parent_inode->i_sb;
 	directory = (struct xfs_entry *)kmalloc(PAGE_SIZE, GFP_KERNEL);
-	if (!directory)
+	if (!directory) {
+		printk(KERN_ERR TFS "tfs_lookup: cannot alloc page for directory\n");
 		return ERR_PTR(-ENOMEM);
+	}
+
+	printk(KERN_ERR TFS "tfs_lookup: page for directory allocated\n");
 
 	ret = tfs_dev_read(sb, parent_inode->i_ino, (void*)directory, PAGE_SIZE);
-	if(ret)
-	{
+	if(ret) {
+		printk(KERN_ERR TFS "tfs_lookup: error reading from device inode number[%ld] error[%d]\n", parent_inode->i_ino, ret);
 		kfree(directory);
 		return ERR_PTR(ret);
 	}
 
+	printk(KERN_ERR TFS "tfs_lookup: read a page from device inode number[%ld]\n", parent_inode->i_ino);
+	
 	iter = directory;
-	while(iter->used)
-	{
+	while(iter->used) {
 		iter++;
 		nentries++;
 	}
+
+	printk(KERN_ERR TFS "tfs_lookup: directory nentries [%d]\n", nentries);
+
+	printk(KERN_ERR TFS "tfs_lookup: searching for [%s]\n", child_dentry->d_name.name);
 
 	iter = directory;
 	for (i = 0; i < nentries; ++i, ++iter) {
 		size_t length = min(strlen(child_dentry->d_name.name), strlen(iter->name));
 
+		printk(KERN_ERR TFS "tfs_lookup: entry [%s] length selected [%ld]\n", iter->name, length);
+
 		if (strncmp(child_dentry->d_name.name, iter->name, length) != 0)
 			continue;
 
+		printk(KERN_ERR TFS "tfs_lookup: match\n");
+
 		inode = iget_locked(sb, iter->lba);
-		if (!inode)
-		{
-			printk(KERN_ERR TFS "tfs_lookup: iget_locked() returned NULL\n");
+		if (!inode) {
+			printk(KERN_ERR TFS "tfs_lookup: iget_locked returned NULL\n");
 			kfree(directory);
 			return ERR_PTR(-EFAULT);
 		}
 
-		if (inode->i_state & I_NEW)
-		{
+		if (inode->i_state & I_NEW) {
 			inode_init_owner(inode, parent_inode, 0);
 
 			inode->i_ino  = iter->lba;
@@ -66,23 +79,24 @@ struct dentry *tfs_lookup(struct inode *parent_inode,
 			//i_gid_write(inode, ?);
 			inode->i_atime = inode->i_ctime = inode->i_mtime = current_time(inode);
 			inode->i_op = &tfs_inode_ops;
-			if (iter->is_directory)
-			{
+			if (iter->is_directory)	{
 				inode->i_fop = &tfs_dir_ops;
-			}
-			else
-			{
+			} else {
 				inode->i_fop            = &tfs_file_ops;
 				inode->i_mapping->a_ops = &tfs_as_ops;
 			}
 			insert_inode_hash(inode);
 			unlock_new_inode(inode);
+
+			printk(KERN_ERR TFS "tfs_lookup: inode set up\n");
 		}
 		break;
 	}
 
 	kfree(directory);
 	d_add(child_dentry, inode);
+
+	printk(KERN_ERR TFS "tfs_lookup: exiting\n");
 	return NULL;
 }
 
