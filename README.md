@@ -23,3 +23,17 @@ Each directory entry is 64 bytes long and has the following data:
 - **size**         : size (4096 for directories, whatever for files)
 
 As is a readonly filesystem which is generated for system boot, all sector of a file happens to be contiguous.
+
+# Test
+To check, compile the module and do the following:
+- losetup /dev/loopX /path/to/tfs/dat/tfs.dsk
+- insmod tfs.ko
+- mount -t tfs /dev/loopX /path/to/mount
+
+where loopX is a usable loop device (you can find with losetup --find)
+
+To unload:
+- umount -t tfs /path/to/mount
+- rmmod tfs.ko
+- losetup -d /dev/loopX
+
