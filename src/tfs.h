@@ -2,7 +2,7 @@
 #define __TFS_H__
 
 #define XFS_SECTOR_SIZE     512
-#define XFT_LBA		    1
+#define XFT_LBA             1
 #define XFT_SECTORS	    1
 #define XFT_SIZE	    (XFS_SECTOR_SIZE * XFT_SECTORS)
 
